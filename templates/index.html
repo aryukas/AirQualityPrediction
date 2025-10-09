@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Air Quality Tracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 min-h-screen flex flex-col">
+  <div class="container mx-auto p-8 max-w-7xl">
+    <!-- Title -->
+    <h1 class="text-5xl font-extrabold text-center mb-12 text-gray-800 tracking-wide drop-shadow-md">
+      🌏 India Air Quality Tracker
+    </h1>
+
+    <!-- City Selection -->
+    <div class="flex justify-center mb-10">
+      <form method="POST" action="" class="flex items-center gap-4 flex-wrap justify-center">
+        <select name="city" class="border-2 border-gray-300 rounded-lg p-2 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          {% for city in cities %}
+            <option value="{{ city }}" {% if city == selected_city.name %}selected{% endif %}>{{ city }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow-lg transition-all">
+          View
+        </button>
+      </form>
+    </div>
+
+    <!-- AQI Circle and Pollutant Stats -->
+    <div class="flex flex-col lg:flex-row justify-center items-center gap-12 mb-14">
+      <!-- Circular AQI Meter -->
+      <div class="relative w-52 h-52 flex-shrink-0">
+        <svg class="w-52 h-52">
+          <circle class="text-gray-300" stroke-width="12" stroke="currentColor" fill="transparent" r="80" cx="105" cy="105"/>
+          <circle class="text-blue-500" stroke-width="12" stroke-linecap="round" fill="transparent" r="80" cx="105" cy="105"
+            stroke-dasharray="500" stroke-dashoffset="{{ 500 - (selected_city.AQI / 500 * 500) }}"/>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-800">
+          <span class="text-4xl font-bold">{% if selected_city.AQI == 0 %}N/A{% else %}{{ selected_city.AQI }}{% endif %}</span>
+          <span class="text-base font-medium text-gray-600 mt-1">Predicted AQI</span>
+        </div>
+      </div>
+
+      <!-- Pollutant Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full justify-items-center">
+        {% for pollutant, value in selected_city.pollutants.items() %}
+        <div class="rounded-2xl shadow-lg p-5 w-44 text-center flex flex-col items-center justify-center transition transform hover:scale-105 hover:shadow-2xl
+            {% if value <= 50 %}bg-green-200{% elif value <=100 %}bg-yellow-200{% elif value <=150 %}bg-orange-200{% elif value <=200 %}bg-red-200{% else %}bg-purple-300{% endif %}">
+          <p class="font-semibold text-lg text-gray-700">{{ pollutant }}</p>
+          <p class="text-3xl mt-2 font-bold text-gray-800">{% if value == 0 %}N/A{% else %}{{ value }}{% endif %}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- AQI Charts Section -->
+    <div class="grid md:grid-cols-2 gap-10">
+      <!-- Past AQI Trend -->
+      <div class="bg-white shadow-2xl rounded-xl p-6 hover:shadow-3xl transition">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700 text-center">📊 AQI Trend (Past)</h2>
+        <canvas id="aqiChart" class="max-h-80"></canvas>
+      </div>
+
+      <!-- Future AQI Prediction -->
+      <div class="bg-white shadow-2xl rounded-xl p-6 hover:shadow-3xl transition">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700 text-center">📈 Predicted AQI (Next 7 Days)</h2>
+        <canvas id="futureAqiChart" class="max-h-80"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart JS -->
+  <script>
+    const ctx = document.getElementById('aqiChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ selected_city.history_labels | safe }},
+        datasets: [{
+          label: 'AQI',
+          data: {{ selected_city.history_values | safe }},
+          borderColor: 'rgba(59,130,246,1)',
+          backgroundColor: 'rgba(59,130,246,0.2)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: 4
+        }]
+      },
+      options: { responsive:true, maintainAspectRatio:false }
+    });
+
+    const futureCtx = document.getElementById('futureAqiChart').getContext('2d');
+    new Chart(futureCtx, {
+      type: 'line',
+      data: {
+        labels: {{ future_labels | safe }},
+        datasets: [{
+          label: 'Predicted AQI',
+          data: {{ future_values | safe }},
+          borderColor: 'rgba(255,99,132,1)',
+          backgroundColor: 'rgba(255,99,132,0.2)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: 4
+        }]
+      },
+      options: { responsive:true, maintainAspectRatio:false }
+    });
+  </script>
+</body>
+</html>
