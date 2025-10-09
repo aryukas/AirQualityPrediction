@@ -23,3 +23,5 @@ Clone the repository
 
 git clone https://github.com/aryukas/AirQualityPrediction.git
 cd AirQualityPrediction
+! [image_alt](https://github.com/aryukas/AirQualityPrediction/blob/main/Screenshot%202025-10-09%20202653.png?raw=true)
+
