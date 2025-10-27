@@ -33,11 +33,12 @@ Data Insights Dashboard:
 Add city comparison features and pollutant source analysi
  Installation & Setup
 
-to clone Clone the repository
+to clone this Clone the repository
 
 git clone https://github.com/aryukas/AirQualityPrediction.git
 cd AirQualityPrediction
 <img width="1917" height="867" alt="Screenshot 2025-10-09 202653" src="https://github.com/user-attachments/assets/67567bb8-2bec-48de-b94e-e25b66096f75" />
+
 
 
 
